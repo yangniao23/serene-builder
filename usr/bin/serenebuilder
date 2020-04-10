@@ -85,10 +85,9 @@ fi
 
 cat > ./serenebuilder.log << "EOF"
 
-       ===============================
-       ==  serenebuilder log  file  ==
-       ===============================
-           serenebuilder  ${serenebuilderVERSION}
+       ==================================
+       ==  serenebuilder  ログファイル ==
+       ==================================
 
 EOF
 
@@ -99,14 +98,14 @@ if [ "${CUSTOMISO}" == "serenebuilder.iso" ] ; then
 fi
 
 #システム情報の出力
-log_only " System info:"
+log_only " システム情報:"
 
 if [ -e "/sys/firmware/efi/efivars/*" ] ; then
   BOOT_FIRMWARE="EFI"
-  log_only "EFI vars found in /sys/firmware/efi/efivars/"
+  log_only "EFIベースのシステムが検出されました"
 else
   BOOT_FIRMWARE="BIOS"
-  log_only "no EFI vars found in /sys/firmware/efi/efivars/" 
+  log_only "BIOSベースのシステムが検出されました" 
 fi
 
 # Ubiquityのスライドショーがインストール済みか確認
@@ -114,7 +113,7 @@ slideshow_present=`dpkg --get-selections | grep 'slideshow'`
 if [ ! "${slideshow_present}" ] ; then
   bodhi_slideshow_present=`dpkg --get-selections | grep 'bodhi-slideshow'`
   if [ ! "${bodhi_slideshow_present}" ] ; then
-    error "No slideshow installed for ubiquity" 1
+    error "ubiquity用のスライドショーがインストールされていません" 1
   fi
 fi
 
@@ -159,7 +158,7 @@ if [ "${uid_990_check}" -o "${gid_990_check}" ] ; then
         exit 1
     fi
 else
-    log_msg " GID & UID 990 are not in use, that's good"
+    log_msg " GID及びUID990番は未使用です。処理を続行します"
 fi
 
 log_msg "不要なパッケージの削除を行いシステムをクリーンアップします"
@@ -188,7 +187,7 @@ if [ "${ubiquity_frontend_gtk_status}" ] ; then
     apt-get -y -q remove ubiquity-frontend-gtk &>> ${WORKDIR}/serenebuilder.log
     sleep 1
 else
-    echo "ubiquity-frontend-gtk not initially installed" >> ${WORKDIR}/serenebuilder.log
+    log_only "ubiquity-frontend-gtkはインストールされませんでした。"
 fi
 apt-get -y -q install ubiquity-frontend-gtk &>> ${WORKDIR}/serenebuilder.log
 
@@ -200,7 +199,7 @@ fi
 # 使用中のディスプレイマネージャを確認
 currentdm_path="`cat /etc/X11/default-display-manager`"
   currentdm=`basename ${currentdm_path}`
-  log_msg "Current Display Manager (currentdm) is ${currentdm}  @  ${currentdm_path}"
+  log_msg "既定のディスプレイマネージャは ${currentdm}  @  ${currentdm_path}です"
 
 log_msg "${LIVECDLABEL}にディストリビューション名を書き換え"
 sed -i 's/PRETTY_NAME=.*/PRETTY_NAME="LIVECDLABEL"/g' /usr/lib/os-release
@@ -227,7 +226,7 @@ fi
 
 mkdir -vp ${WORKDIR}/ISOTMP/{isolinux,install,.disk}
 
-log_msg "/varと/etcをCDツリーにコピー"
+log_msg "/varと/etcをCDツリーにコピーしています"
 
 unset ALLEXCLUDES
 unset VAREXCLUDES
