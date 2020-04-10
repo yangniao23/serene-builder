@@ -228,46 +228,13 @@ mkdir -vp ${WORKDIR}/ISOTMP/{isolinux,install,.disk}
 
 log_msg "/varと/etcをCDツリーにコピーしています"
 
-unset ALLEXCLUDES
-unset VAREXCLUDES
-unset ETCEXCLUDES
-
-if [ "${EXCLUDES}" ] ; then
-    echo "EXCLUDES variable is not empty" >> ${WORKDIR}/serenebuilder.log
-    for add in ${EXCLUDES} ; do # all exclusions
-        ALLEXCLUDES="${ALLEXCLUDES} --exclude='${add}' "
-    done
-    for addvar in ${EXCLUDES} ; do # exclusions in the var dir
-        addvaryes=`echo ${addvar} | grep '/var/'`
-        if [ "${addvaryes}" ] ; then
-            VAREXCLUDES="${VAREXCLUDES} --exclude='${addvaryes}' "
-        fi
-    done
-
-    VAREXCLUDES=`echo ${VAREXCLUDES} | sed 's/\/var\//\//g'`
-    echo "" >> ${WORKDIR}/serenebuilder.log
-    echo "   Edited VAREXCLUDES IS:" >> ${WORKDIR}/serenebuilder.log
-    echo "${VAREXCLUDES}" >> ${WORKDIR}/serenebuilder.log
-    for addetc in ${EXCLUDES} ; do # exclusions in the etc dir
-        addetcyes=`echo ${addetc} | grep '/etc/'`
-        if [ "${addetcyes}" ] ; then
-            ETCEXCLUDES="${ETCEXCLUDES} --exclude='${addetcyes}' "
-        fi
-    done
-
-    ETCEXCLUDES=`echo ${ETCEXCLUDES} | sed 's/\/etc\//\//g'` # Cleanup path for etc exclusions for rsync
-    echo "" >> ${WORKDIR}/serenebuilder.log
-    echo "   Edited ETCEXCLUDES IS:" >> ${WORKDIR}/serenebuilder.log
-    echo "${ETCEXCLUDES}" >> ${WORKDIR}/serenebuilder.log
-fi
-
 # /etcと/varをrsyncする
-var_sync="rsync -a --exclude='*.log.[0-9]*' --exclude='*.log.old' --exclude='syslog.[0-9]*' --exclude='[bw]tmp.[0-9]*' --exclude='*.pid' --exclude='*.bak' --exclude='*.[0-9].gz' --exclude='*.deb' --exclude='kdecache*' --exclude='*~' ${VAREXCLUDES} /var/. ${WORKDIR}/dummysys/var/."
+var_sync="rsync -a --exclude='*.log.[0-9]*' --exclude='*.log.old' --exclude='syslog.[0-9]*' --exclude='[bw]tmp.[0-9]*' --exclude='*.pid' --exclude='*.bak' --exclude='*.[0-9].gz' --exclude='*.deb' --exclude='kdecache*'  /var/. ${WORKDIR}/dummysys/var/."
 echo "   syncing /var/ directory using:" >> ${WORKDIR}/serenebuilder.log
 echo "> ${var_sync}" >> ${WORKDIR}/serenebuilder.log
 eval ${var_sync}
 
-etc_sync="rsync -a ${ETCEXCLUDES} /etc/. ${WORKDIR}/dummysys/etc/."
+etc_sync="rsync -a /etc/. ${WORKDIR}/dummysys/etc/."
 echo "   syncing /etc/ directory using:" >> ${WORKDIR}/serenebuilder.log
 echo "> ${etc_sync}" >> ${WORKDIR}/serenebuilder.log
 eval ${etc_sync}
