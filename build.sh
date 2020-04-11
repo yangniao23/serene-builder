@@ -13,7 +13,7 @@ fi
 
 DIR=$(cd $(dirname $0); pwd)
 cd $DIR
-
-docker build -t build_serenebuilder .
 cd ../
+
+docker build -t build_serenebuilder  -f $DIR .
 docker run -it -v $DIR/out:/out  build_serenebuilder
