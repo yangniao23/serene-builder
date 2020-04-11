@@ -1,11 +1,11 @@
 #! /bin/sh
 ### BEGIN INIT INFO
-# Provides:          serenebuilder-firstboot
+# Provides:          bodhibuilder-firstboot
 # Required-Start:    $remote_fs $syslog $all
 # Required-Stop:
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: Run firstboot items for serenebuilder after a remastered system has been installed
+# Short-Description: Run firstboot items for bodhibuilder after a remastered system has been installed
 ### END INIT INFO
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin:/usr/local/sbin
@@ -15,10 +15,10 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin:/usr/local/sbin
 
 do_start() {
     #REM302
-    if [ "`cat /proc/cmdline | grep casper`" = "" ]; then
-        [ "$VERBOSE" != no ] && log_begin_msg "Running serenebuilder-firstboot"
+    if [ "`cat /proc/cmdline | grep casper`" = "" ]; then # run thru this if it's NOT an ISO
+        [ "$VERBOSE" != no ] && log_begin_msg "Running bodhibuilder-firstboot"
         # Removes this script from boot:
-        (sleep 60 && update-rc.d -f serenebuilder-firstboot remove) &
+        (sleep 60 && update-rc.d -f bodhibuilder-firstboot remove) &
         sed -i -e 's/root:x:/root:!:/g' /etc/shadow
         ## Ubiquity
             # Remove ubiquity icon from desktop
@@ -27,20 +27,34 @@ do_start() {
             yes | rm -rf /usr/share/applications/UBIQUITY.desktop
             # Remove ubiquity from menus
             sed -i -e 's/NoDisplay=false/NoDisplay=true/' /usr/share/applications/ubiquity.desktop
-        # Create serenebuilder desktop file for menus
-        yes | cp -f /etc/serenebuilder/applications/serenebuilder-gtk.desktop /usr/share/applications/
-        # Add custom repositories to the installed OS
-        cat /etc/serenebuilder/apt/custom_repos >> /etc/apt/sources.list && echo '' > /etc/serenebuilder/apt/custom_repos
-        # Replace OS grub with serenebuilder's custom grub
+            sed -i -e 's/Hidden=false/Hidden=true/' /usr/share/applications/ubiquity.desktop
+
+        # Create bodhibuilder desktop file for menus
+        yes | cp -f /etc/bodhibuilder/applications/bodhibuilder-gtk.desktop /usr/share/applications/
+
+        # Restore sources.list from source OS
+        if [ -e /etc/bodhibuilder/apt/sources.list_BB ] ; then
+          yes | mv /etc/apt/sources.list /etc/apt/sources.list_ORIG
+          yes | mv /etc/bodhibuilder/apt/sources.list_BB /etc/apt/sources.list
+          sleep 1
+        fi
+        # Remove any remaining cdrom repos that may be in sources.list
+        sed -i '/cdrom:/d' /etc/apt/sources.list &> /dev/null
+
+        # Replace OS grub with bodhibuilder's custom grub
         yes | cp -f /etc/default/grub.bodhi /etc/default/grub
+        sed -i "s/^DISTRIB_DESCRIPTION=.*$/DISTRIB_DESCRIPTION=\"__DISTNAME__\"/" /etc/lsb-release
         update-grub
-        
+
         ################################################
+        ### CUSTOM COMMANDS
+        #
+        # Commands entered into this section will be run only when
+        # after the system has been installed and booted for the
+        # first time, and never again.
+        #
         ### Place your custom commands below this line
-        # Please add custom repositories and comments for them into the file
-        #   /etc/serenebuilder/apt/custom_repos
-        # This script will append everything in that file to the
-        # existing /etc/apt/sources.list file
+        
         
         ### Place your custom commands above this line
         ################################################
@@ -48,6 +62,12 @@ do_start() {
         ES=$?
         [ "$VERBOSE" != no ] && log_end_msg $ES
         return $ES
+    else # run through this if it IS an ISO
+        logger bodhibuilder ISO booted
+        sleep 1
+        # Remove any cdrom: repos that may be in sources.list
+        sed -i '/cdrom:/d' /etc/apt/sources.list &> /dev/null
+        
     fi
 }
 
