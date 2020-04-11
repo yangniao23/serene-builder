@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [[ $UID != 0 ]]; then
-    echo "You have to run this as root." 1>&2
+if [[ $UID == 0 ]]; then
+    echo "You must not run this as root." 1>&2
     exit 1
 fi
 
@@ -14,5 +14,5 @@ fi
 DIR=$(cd $(dirname $0); pwd)
 cd $DIR
 
-docker build -t build_serenebuilder .
-docker run -it -v $DIR:/serene-builder-source:ro -v $DIR/out:/out  build_serenebuilder
+sudo docker build -t build_serenebuilder .
+sudo docker run -e UGID="${UID}:$(id -u)" -it -v $DIR:/serene-builder-source:ro -v $DIR/out:/out  build_serenebuilder
