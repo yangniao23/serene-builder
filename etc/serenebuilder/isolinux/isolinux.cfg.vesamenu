@@ -10,17 +10,17 @@ menu color hotsel 1;32;40 #ff4da435 #ff000000 none
 
 label live
   menu label ^Legacy/BIOS Boot the __DISTNAME__ Desktop
-  kernel /casper/vmlinuz
+  kernel /casper/vmlinuz.efi
   append  noprompt file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.lz quiet splash --
 
 label xforcevesa
   menu label ^Legacy/BIOS Boot __DISTNAME__ In Safe Graphics Mode
-  kernel /casper/vmlinuz
+  kernel /casper/vmlinuz.efi
   append  noprompt file=/cdrom/preseed/custom.seed boot=casper nomodeset xforcevesa initrd=/casper/initrd.lz quiet splash --
 
 label live-install
   menu label ^Legacy/BIOS Direct Install __DISTNAME__
-  kernel /casper/vmlinuz
+  kernel /casper/vmlinuz.efi
   append  noprompt file=/cdrom/preseed/custom.seed boot=casper only-ubiquity initrd=/casper/initrd.lz quiet splash ---
   
 label memtest
@@ -30,7 +30,7 @@ label memtest
   
 label check
   menu label ^Check __DISTNAME__ Distro Integrity
-  kernel /casper/vmlinuz
+  kernel /casper/vmlinuz.efi
   append  boot=casper integrity-check initrd=/casper/initrd.lz quiet splash --
 
 label hd
