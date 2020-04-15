@@ -214,7 +214,7 @@ if [ -d "${WORKDIR}/dummysys" ] ; then
     rm -rf ${WORKDIR}/dummysys/run/*
     rm -rf ${WORKDIR}/ISOTMP/{isolinux,grub,.disk
 else
-    log_msg "Creating ${WORKDIR} folder tree"
+    log_msg "${WORKDIR}にフォルダツリーを作成しています"
     mkdir -vp ${WORKDIR}/ISOTMP/{casper,preseed}
     mkdir -vp ${WORKDIR}/dummysys/{dev,etc,proc,tmp,sys,mnt,media/cdrom,var}
     rsync -a /dev/urandom ${WORKDIR}/dummysys/dev/
@@ -257,7 +257,7 @@ echo "---------------------------" >> ${WORKDIR}/serenebuilder.log
 
 # GRUB設定を変更
 if [ -e /etc/serenebuilder/grub/grub.bodhi ] ; then
-    log_msg "Found custom grub for ${DISTNAME}"
+    log_msg "${DISTNAME}向けのカスタムGRUB設定が見つかりました"
     cp -f /etc/serenebuilder/grub/grub.bodhi ${WORKDIR}/dummysys/etc/default/
     chmod 644 ${WORKDIR}/dummysys/etc/default/grub.bodhi
     cp -f /etc/serenebuilder/grub/grub.bodhi ${WORKDIR}/dummysys/etc/default/grub
@@ -290,7 +290,7 @@ cp -f /etc/serenebuilder/isofiles/rc.local ${WORKDIR}/dummysys/etc/rc.local
 chmod 755 ${WORKDIR}/dummysys/etc/rc.local
 sed -i "s/__LIVEUSER__/${LIVEUSER}/g" ${WORKDIR}/dummysys/etc/rc.local
 
-log_msg "Cleaning up files not needed for the live in ${WORKDIR}/dummysys"
+log_msg "${WORKDIR}/dummysys下のLive環境に不必要なファイルを消去しています"
 rm -rf ${WORKDIR}/dummysys/etc/apt/sources.list.d/*.save &> /dev/null
 rm -rf ${WORKDIR}/dummysys/etc/apt/apt.conf.d/* &> /dev/null
 rm -rf ${WORKDIR}/dummysys/etc/apt/preferences.d/* &> /dev/null
@@ -381,8 +381,6 @@ grep '^[^:]*:[^:]*:[1-2][0-9][0-9][0-9][0-9]:' /etc/passwd | awk -F ":" '{print 
 
 cat ${WORKDIR}/tmpusers1 ${WORKDIR}/tmpusers2 ${WORKDIR}/tmpusers3 > ${WORKDIR}/tmpusers
 rm -f ${WORKDIR}/tmpusers[0-9] &> /dev/null
-cat ${WORKDIR}/tmpusers1 ${WORKDIR}/tmpusers2 ${WORKDIR}/tmpusers3 > ${WORKDIR}/tmpusers
-rm -f ${WORKDIR}/tmpusers[0-9] &> /dev/null
 
 cat ${WORKDIR}/tmpusers | while read LINE ;do
     echo ${LINE} | xargs -i sed -e 's/,{}$//g' ${WORKDIR}/dummysys/etc/group > ${WORKDIR}/dummysys/etc/group.new1
@@ -394,8 +392,7 @@ done
 
 log_msg "自動ログイン設定"
 [ ! -d ${WORKDIR}/dummysys/home ] && mkdir ${WORKDIR}/dummysys/home
-chmod 755 /usr/share/initramfs-tools/scripts/casper-
-bottom/*adduser /usr/share/initramfs-tools/scripts/casper-bottom/*autologin /usr/share/initramfs-tools/scripts/casper
+chmod 755 /usr/share/initramfs-tools/scripts/casper-bottom/*adduser /usr/share/initramfs-tools/scripts/casper-bottom/*autologin /usr/share/initramfs-tools/scripts/casper
 
 log_msg "インターネット接続を確認しています"
 netconnstatus=`dig | grep -o 'Got answer'` # report if ANY network hardware is connected
@@ -531,9 +528,6 @@ sleep 1
 
 log_msg " casper.confを作成します"
 log_msg "ubiquity.desktopをコピーしています"
-echo "- /usr/share/applications/下にある利用可能なUbiquity.desktopのリスト"
-ls -l /usr/share/applications/UBIQUITY* >>${WORKDIR}/serenebuilder.log
-ls -l /usr/share/applications/ubiquity* >>${WORKDIR}/serenebuilder.log
 if [ ! -e /usr/share/applications/UBIQUITY.desktop_ORIG ] ; then
     echo "- 元のubiquity.desktopの名前をUBIQUITY.desktop_ORIGに変更します" >>${WORKDIR}/serenebuilder.log
     find /usr/share/applications -name 'ubiquity.desktop' -execdir mv -v '{}' UBIQUITY.desktop_ORIG \; >>${WORKDIR}/serenebuilder.log
@@ -641,7 +635,7 @@ if [ "${DISTICONS}" ] ; then
 fi
 
 if [ "${DISTLOCALE}" ] ; then
-    log_msg "Purging unwanted locales"
+    log_msg "不要な地域設定を削除しています"
     EXCLUDELOCALES=`find /usr/share/locale/* -maxdepth 0 -type d -exec echo -n {} +` # lists all directories in /usr/share/locale/
     echo "      EXCLUDELOCALES started as:" >>${WORKDIR}/serenebuilder.log
     echo " > ${EXCLUDELOCALES}" >>${WORKDIR}/serenebuilder.log
